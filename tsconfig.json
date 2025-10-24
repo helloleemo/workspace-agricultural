@@ -5,6 +5,12 @@
   "references": [
     {
       "path": "./apps/react-demo"
+    },
+    {
+      "path": "./apps/agri-frontend-e2e"
+    },
+    {
+      "path": "./apps/agri-frontend"
     }
   ]
 }
