@@ -12,9 +12,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './{src,pages,components,app}/**/*.{ts,tsx,js,jsx,html}',
-    '!./{src,pages,components,app}/**/*.{stories,spec}.{ts,tsx,js,jsx,html}',
-    //     ...createGlobPatternsForDependencies(__dirname)
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    // ...createGlobPatternsForDependencies(__dirname),
   ],
   theme: {
     extend: {},

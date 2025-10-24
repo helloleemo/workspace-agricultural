@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL") // 讓 migrate/生成 client 走直連
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  name      String
+  price     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 執行遷移（會自動執行 generate）
+// npx prisma migrate dev --name init
+
+// 如果只是修改了 schema 但不需要遷移，單獨執行 generate
+// npx prisma generate
