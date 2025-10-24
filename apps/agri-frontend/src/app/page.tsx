@@ -1,5 +1,10 @@
 import Link from "next/link";
 
+export const metadata = {
+  title: "Agricultural Site",
+  description: "About our agricultural site"
+};
+
 export default function Index() {
   /*
    * Replace the elements below with your own.
@@ -8,7 +13,7 @@ export default function Index() {
    */
   return (
     
-    <nav className="flex gap-5">
+    <nav className="flex gap-5 text-red-500">
       <Link href="/about">關於我們</Link>
       <Link href="/products">檢視所有農產品</Link>
       <Link href="/login">登入註冊</Link>
