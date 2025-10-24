@@ -11,11 +11,13 @@ datasource db {
 model Product {
   id        Int      @id @default(autoincrement())
   name      String
-  price     Float    
+  price     Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// 建立資料表 & 生成 client
+// 執行遷移（會自動執行 generate）
 // npx prisma migrate dev --name init
+
+// 如果只是修改了 schema 但不需要遷移，單獨執行 generate
 // npx prisma generate
