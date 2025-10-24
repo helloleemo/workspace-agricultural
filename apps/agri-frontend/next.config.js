@@ -7,6 +7,7 @@ const { composePlugins, withNx } = require('@nx/next');
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
 const nextConfig = {
+  reactStrictMode: true,
   // Use this to set Nx-specific options
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
@@ -18,3 +19,4 @@ const plugins = [
 ];
 
 module.exports = composePlugins(...plugins)(nextConfig);
+// module.exports = nextConfig;
