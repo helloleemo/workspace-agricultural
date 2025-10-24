@@ -11,7 +11,7 @@ export default async function ProductsPage() {
   
   return (
     <main className="p-6">
-      <h1 className="text-2xl font-bold mb-4">農產品</h1>
+      <h1 className="text-5xl font-bold mb-4 text-red-500">農產品</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
           <div key={product.id} className="p-4 border rounded-lg shadow">
