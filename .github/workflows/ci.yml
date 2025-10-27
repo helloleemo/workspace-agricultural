@@ -18,28 +18,38 @@ jobs:
         with:
           filter: tree:0
           fetch-depth: 0
-      # This enables task distribution via Nx Cloud
-      # Run this command as early as possible, before dependencies are installed
-      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-      # Uncomment this line to enable task distribution
-      # - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
 
       - name: Start CI Run
         run: npx nx start-ci-run --auto-apply-fixes="*format*,*lint*" --no-distribution
 
-      # Cache node_modules
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
       - run: npm ci --legacy-peer-deps
+
+      # 生成 Prisma Client
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
       - run: npx nx fix-ci
         if: always()
 
-      # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
-      # - run: npx nx-cloud record -- echo Hello World
       - run: npx nx run-many -t lint test build typecheck
-      # Nx Cloud recommends fixes for failures to help you get CI green faster. Learn more: https://nx.dev/ci/features/self-healing-ci
+
+      # 只在 main 分支構建 Docker
+      - name: Build Docker image
+        if: github.ref == 'refs/heads/main'
+        run: docker build -t agri-frontend .
+
+      - name: Test Docker container
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker run -d -p 3000:3000 --name test-container agri-frontend
+          sleep 10
+          curl -f http://localhost:3000 || exit 1
+          docker stop test-container
+
       - run: npx nx fix-ci
         if: always()
