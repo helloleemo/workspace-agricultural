@@ -1,0 +1,15 @@
+{
+  "name": "agri-frontend",
+  "sourceRoot": "apps/agri-frontend/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "options": {
+        "root": "apps/agri-frontend",
+        "outputPath": "dist/apps/agri-frontend"
+      },
+      "outputs": ["{workspaceRoot}/dist/apps/agri-frontend"]
+    }
+  }
+}
