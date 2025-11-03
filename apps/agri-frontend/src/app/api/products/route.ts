@@ -28,21 +28,43 @@ export const POST = (req: Request) =>
     ) {
       throw new Error('validation: Product name is required');
     }
-
-    if (typeof body.price !== 'number' || body.price <= 0) {
-      throw new Error('validation: Product price must be a positive number');
+    if (
+      !body?.description ||
+      typeof body.description !== 'string' ||
+      body.description.trim() === ''
+    ) {
+      throw new Error('validation: Product description is required');
+    }
+    if (
+      !body?.mainImage ||
+      typeof body.mainImage !== 'string' ||
+      body.mainImage.trim() === ''
+    ) {
+      throw new Error('validation: Product mainImage is required');
+    }
+    if (
+      !Array.isArray(body.detailImages) ||
+      body.detailImages.length === 0 ||
+      !body.detailImages.every(
+        (img: any) => typeof img === 'string' && img.trim() !== ''
+      )
+    ) {
+      throw new Error(
+        'validation: Product detailImages must be a non-empty string array'
+      );
     }
 
     const product = await prisma.product.create({
       data: {
         name: body.name.trim(),
-        price: body.price,
+        description: body.description.trim(),
+        mainImage: body.mainImage.trim(),
+        detailImages: body.detailImages,
       },
     });
 
     logInfo('POST /api/products', `Created product with id: ${product.id}`, {
       name: product.name,
-      price: product.price,
     });
 
     return Response.json(product, { status: 201 });

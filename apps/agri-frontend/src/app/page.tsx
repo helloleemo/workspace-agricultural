@@ -1,3 +1,4 @@
+import { Features } from '@/components/Features.tsx';
 import { IconList } from '@/components/IconList.tsx';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -42,63 +43,7 @@ export default function Index() {
       </div>
       {/* 介紹區塊 */}
       <div>
-        <div className="grid sm:grid-cols-2 grid-cols-1">
-          {/* 特色1 */}
-          <div className="w-full sm:order-1 sm:col-span-1 col-span-2 order-1">
-            <Image
-              className="object-cover sm:h-[50vh] h-[350px] w-full"
-              src="/img/img01.png"
-              alt="Introduction 1"
-              width={400}
-              height={350}
-            />
-          </div>
-          <div className="w-full bg-neutral-100 sm:order-2 sm:col-span-1 col-span-2 order-2">
-            <div className="p-10 flex flex-col justify-center items-center h-full">
-              <p className="font-bold text-lg">這是介紹區塊</p>
-              <p className="w-[300px] text-center text-xs pt-3 ">
-                這是介紹區塊的詳細內容，這是介紹區塊的詳細內容
-              </p>
-            </div>
-          </div>
-          {/* 特色2 */}
-          <div className="w-full bg-neutral-100 sm:order-3 sm:col-span-1 col-span-2 order-4">
-            <div className="p-10 flex flex-col justify-center items-center h-full ">
-              <p className="font-bold text-lg">這是介紹區塊</p>
-              <p className="w-[300px] text-center text-xs pt-3 ">
-                這是介紹區塊的詳細內容，這是介紹區塊的詳細內容
-              </p>
-            </div>
-          </div>
-          <div className="w-full sm:order-4 order-3 sm:col-span-1 col-span-2">
-            <Image
-              className="object-cover sm:h-[50vh] h-[350px] w-full"
-              src="/img/img01.png"
-              alt="Introduction 1"
-              width={400}
-              height={350}
-            />
-          </div>
-          {/* 特色3 */}
-          <div className="border border-red-500 w-full col-span-2 order-4">
-            <div className="p-10 flex flex-col justify-center items-center h-full ">
-              <p className="font-bold text-lg">這是介紹區塊</p>
-              <p className="w-[300px] text-center text-xs pt-3  ">
-                這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容
-              </p>
-            </div>
-          </div>
-          {/* 特色4 - 預定流程 */}
-          <div className="border border-red-500 w-full col-span-2 ">
-            <div className="p-10 flex flex-col justify-center items-center h-full ">
-              <p className="font-bold text-lg">這是介紹區塊</p>
-              <p className="w-[300px] text-center text-xs pt-3  ">
-                這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容
-              </p>
-              <div className="w-full"></div>
-            </div>
-          </div>
-        </div>
+        <Features />
       </div>
     </>
   );
