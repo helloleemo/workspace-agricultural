@@ -1,8 +1,4 @@
 import { FadeCarousel } from '@/components/FadeCarousel';
-import { Features } from '@/components/Features.tsx';
-import { IconList } from '@/components/IconList.tsx';
-import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 
 export const metadata = {
   title: 'Agricultural Site',
