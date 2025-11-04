@@ -13,6 +13,9 @@ COPY nx.json ./
 COPY tsconfig*.json ./
 RUN npm ci
 
+WORKDIR /app/apps/agri-frontend2
+RUN npm ci
+
 # ---------- builder：建置 Next ----------
 FROM base AS builder
 WORKDIR /app
