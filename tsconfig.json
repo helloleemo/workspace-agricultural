@@ -11,6 +11,12 @@
     },
     {
       "path": "./apps/agri-frontend"
+    },
+    {
+      "path": "./apps/agri-frontend2-e2e"
+    },
+    {
+      "path": "./apps/agri-frontend2"
     }
   ]
 }
