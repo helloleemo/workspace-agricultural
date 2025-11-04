@@ -5,7 +5,7 @@
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  directUrl  = env("DIRECT_URL") // 讓 migrate/生成 client 走直連
+  // directUrl  = env("DIRECT_URL") // 讓 migrate/生成 client 走直連
 }
 
 
