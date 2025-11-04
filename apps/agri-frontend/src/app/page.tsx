@@ -1,17 +1,12 @@
 import { IconList } from '@/components/IconList.tsx';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { IntroSection } from '@/components/IntroSection';
+import { metadataIndex } from '@/configs/metadata';
+import { wordingContent } from '@/configs/wording';
 
-export const metadata = {
-  title: 'Agricultural Site',
-  description: 'About our agricultural site',
-};
-
-const content = {
-  title: '農產品網頁',
-  description:
-    '提供最新鮮的農產品，直接從農場到您的餐桌，支持本地農業，享受健康生活。',
-};
+// Meta description for SEO
+export const metadata = metadataIndex;
 
 export default function Index() {
   return (
@@ -19,7 +14,7 @@ export default function Index() {
       {/* 主圖 */}
       <div className="relative w-full -z-10">
         <Image
-          className="object-cover h-[100vh] w-full flex flex-col items-center justify-center gap-5"
+          className="object-cover h-[calc(100vh-100px)] w-full flex flex-col items-center justify-center gap-5"
           src="/img/main.png"
           alt="Agricultural site"
           width={400}
@@ -27,12 +22,18 @@ export default function Index() {
         />
         <div className="alpha bg-neutral-900 opacity-60 absolute inset-0 z-10"></div>
         {/* 主敘述 */}
-        <div className="sm:w-[420px] w-[80vw] leading-relaxed absolute inset-1/2 -translate-x-1/2 z-20 flex flex-col gap-5 items-center justify-center text-white text-center px-5">
-          <p className="font-bold text-2xl sm:text-3xl">{content.title}</p>
-          <p className="text-sm">{content.description}</p>
-          <Button variant="outline" className="w-[220px] mt-4">
-            立即預定
-          </Button>
+        <div className="w-[420px]  leading-relaxed absolute inset-1/2 -translate-x-1/2 z-20 flex flex-col gap-5 items-center justify-center  text-center px-5 z-20">
+          <p className="text-white font-bold text-4xl ">
+            {wordingContent.indexPage.mainSection.title ?? ''}
+          </p>
+          <p className="text-xl text-white">
+            {wordingContent.indexPage.mainSection.description ?? ''}
+          </p>
+          <div>
+            <Button variant="outline" size="lg" className='bg-transparent text-white w-full hover:bg-white/10'>
+              立即預訂
+            </Button>
+          </div>
 
           {/* 最新消息 */}
           <div className="pt-10">
@@ -41,65 +42,35 @@ export default function Index() {
         </div>
       </div>
       {/* 介紹區塊 */}
-      <div>
-        <div className="grid sm:grid-cols-2 grid-cols-1">
-          {/* 特色1 */}
-          <div className="w-full sm:order-1 sm:col-span-1 col-span-2 order-1">
-            <Image
-              className="object-cover sm:h-[50vh] h-[350px] w-full"
-              src="/img/img01.png"
-              alt="Introduction 1"
-              width={400}
-              height={350}
-            />
+      <IntroSection />
+      {/* 其他區塊 */}
+              <Image
+        className="object-cover h-[calc(100vh-100px)] w-full flex flex-col items-center justify-center gap-5"
+        src="/img/img02.png"
+        alt="Agricultural site"
+        width={400}
+        height={350}
+        />
+        <div className="alpha bg-neutral-900 opacity-60  inset-0 z-10"></div>
+        {/* 主敘述 */}
+        <div className="w-[420px]  leading-relaxed  inset-1/2 -translate-x-1/2  flex flex-col gap-5 items-center justify-center  text-center px-5 z-20">
+          <p className="text-white font-bold text-4xl ">
+            {wordingContent.indexPage.mainSection.title ?? ''}
+          </p>
+          <p className="text-xl text-white">
+            {wordingContent.indexPage.mainSection.description ?? ''}
+          </p>
+          <div>
+            <Button variant="outline" size="lg" className='bg-transparent text-white w-full hover:bg-white/10'>
+              立即預訂
+            </Button>
           </div>
-          <div className="w-full bg-neutral-100 sm:order-2 sm:col-span-1 col-span-2 order-2">
-            <div className="p-10 flex flex-col justify-center items-center h-full">
-              <p className="font-bold text-lg">這是介紹區塊</p>
-              <p className="w-[300px] text-center text-xs pt-3 ">
-                這是介紹區塊的詳細內容，這是介紹區塊的詳細內容
-              </p>
-            </div>
-          </div>
-          {/* 特色2 */}
-          <div className="w-full bg-neutral-100 sm:order-3 sm:col-span-1 col-span-2 order-4">
-            <div className="p-10 flex flex-col justify-center items-center h-full ">
-              <p className="font-bold text-lg">這是介紹區塊</p>
-              <p className="w-[300px] text-center text-xs pt-3 ">
-                這是介紹區塊的詳細內容，這是介紹區塊的詳細內容
-              </p>
-            </div>
-          </div>
-          <div className="w-full sm:order-4 order-3 sm:col-span-1 col-span-2">
-            <Image
-              className="object-cover sm:h-[50vh] h-[350px] w-full"
-              src="/img/img01.png"
-              alt="Introduction 1"
-              width={400}
-              height={350}
-            />
-          </div>
-          {/* 特色3 */}
-          <div className="border border-red-500 w-full col-span-2 order-4">
-            <div className="p-10 flex flex-col justify-center items-center h-full ">
-              <p className="font-bold text-lg">這是介紹區塊</p>
-              <p className="w-[300px] text-center text-xs pt-3  ">
-                這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容
-              </p>
-            </div>
-          </div>
-          {/* 特色4 - 預定流程 */}
-          <div className="border border-red-500 w-full col-span-2 ">
-            <div className="p-10 flex flex-col justify-center items-center h-full ">
-              <p className="font-bold text-lg">這是介紹區塊</p>
-              <p className="w-[300px] text-center text-xs pt-3  ">
-                這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容，這是介紹區塊的詳細內容
-              </p>
-              <div className="w-full"></div>
-            </div>
+
+          {/* 最新消息 */}
+          <div className="pt-10">
+            <IconList title="最新消息" theme="light" />
           </div>
         </div>
-      </div>
     </>
   );
 }
