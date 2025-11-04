@@ -1,67 +1,44 @@
-
-
-# ------- base stage -------
+# syntax=docker.io/docker/dockerfile:1
 FROM node:20-alpine AS base
-
-# ------- deps stage -------
-FROM base AS deps
-
-# Prisma的套件所需/sslmode=require
-RUN apk add --no-cache libc6-compat openssl
-
 WORKDIR /app
+RUN apk add --no-cache libc6-compat
 
-# Copy 檔案
-COPY package*.json ./
-COPY apps/agri-frontend/package.json ./apps/agri-frontend/
-COPY prisma ./prisma/
+# ---------- deps：只安裝依賴，最大化快取 ----------
+FROM base AS deps
+WORKDIR /app
+# 複製會影響相依的檔案：根 package* + app 的 package*
+COPY package.json package-lock.json* ./
+COPY apps/agri-frontend2/package.json ./apps/agri-frontend2/package.json
+COPY nx.json ./
+COPY tsconfig*.json ./
+RUN npm ci
 
-# 安裝套件，使用 --legacy-peer-deps 依據lock安裝，忽略peer衝突
-RUN npm ci --legacy-peer-deps
-
-# ------- builder stage -------
+# ---------- builder：建置 Next ----------
 FROM base AS builder
 WORKDIR /app
-
-# 從deps階段複製node_modules
 COPY --from=deps /app/node_modules ./node_modules
-# 複製其他程式的部分
+COPY --from=deps /app/apps/agri-frontend2/node_modules ./apps/agri-frontend2/node_modules
+# 帶入建置所需的原始碼與設定
 COPY . .
+RUN npx nx run agri-frontend2:build
 
-# Generate Prisma client
-RUN npx prisma generate
-# Build the Next.js application using Nx
-RUN npx nx build agri-frontend
-
-# ------- runner stage -------
-FROM base AS runner
+# ---------- runner：最小執行映像 ----------
+FROM node:20-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-
-# Add non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy Prisma files and generated client
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/prisma ./prisma
-
-# Copy the Next.js build output
-COPY --from=builder /app/dist/apps/agri-frontend/public ./public
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/dist/apps/agri-frontend/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/dist/apps/agri-frontend/.next/static ./dist/apps/agri-frontend/.next/static
-
+RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
 USER nextjs
 
-EXPOSE 3000
+# 輸出
+COPY --from=builder /app/apps/agri-frontend2/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/agri-frontend2/.next/standalone/ ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/agri-frontend2/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/agri-frontend2/.next/static ./apps/agri-frontend2/.next/static
+
 
 ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+ENV HOSTNAME=0.0.0.0
+EXPOSE 3000
 
-# Start the server using the Next.js standalone server
-CMD ["node", "dist/apps/agri-frontend/server.js"]
+
+CMD ["node", "apps/agri-frontend2/server.js"]

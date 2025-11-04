@@ -1,3 +1,4 @@
+import { Features } from '@/components/Features.tsx';
 import { IconList } from '@/components/IconList.tsx';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -42,7 +43,6 @@ export default function Index() {
         </div>
       </div>
       {/* 介紹區塊 */}
-      <IntroSection />
       {/* 其他區塊 */}
               <Image
         className="object-cover h-[calc(100vh-100px)] w-full flex flex-col items-center justify-center gap-5"
@@ -71,6 +71,9 @@ export default function Index() {
             <IconList title="最新消息" theme="light" />
           </div>
         </div>
-    </>
+      <div>
+        <Features />
+      </div>
+      </>
   );
 }

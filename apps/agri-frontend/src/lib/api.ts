@@ -6,7 +6,6 @@ export class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${API_BASE_URL}/api${endpoint}`;
-    
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -16,11 +15,11 @@ export class ApiClient {
     };
 
     const response = await fetch(url, config);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     return response.json();
   }
 
@@ -40,7 +39,10 @@ export class ApiClient {
     });
   }
 
-  async updateProduct(id: number, data: Partial<{ name: string; price: number }>) {
+  async updateProduct(
+    id: number,
+    data: Partial<{ name: string; price: number }>
+  ) {
     return this.request<any>(`/products/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
