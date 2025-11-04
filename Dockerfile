@@ -13,13 +13,11 @@ COPY nx.json ./
 COPY tsconfig*.json ./
 RUN npm ci
 
-WORKDIR /app/apps/agri-frontend2
-RUN npm ci
-
 # ---------- builder：建置 Next ----------
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/agri-frontend2/node_modules ./apps/agri-frontend2/node_modules
 # 帶入建置所需的原始碼與設定
 COPY . .
 RUN npx nx run agri-frontend2:build
