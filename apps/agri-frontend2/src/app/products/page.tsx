@@ -1,3 +1,4 @@
+'use client';
 import { apiClient } from '@/lib/api';
 
 export default function ProductPage() {
@@ -9,7 +10,9 @@ export default function ProductPage() {
     try {
       const products = await apiClient.getProducts();
       content.products = products.toString();
-      const product = await apiClient.getProduct('uuid-005');
+      const product = await apiClient.getProduct(
+        '858c2125-fa50-40da-b4c3-ce2bb74329ed',
+      );
       content.product = product.toString();
     } catch (err) {
       console.log(err);

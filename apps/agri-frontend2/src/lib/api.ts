@@ -1,11 +1,14 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
-
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(
+  /\/$/,
+  '',
+);
+const API_PREFIX = '/api';
 export class ApiClient {
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
   ): Promise<T> {
-    const url = `${API_BASE_URL}/api${endpoint}`;
+    const url = `${API_BASE_URL}${API_PREFIX}${endpoint}`;
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
