@@ -22,6 +22,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/agri-frontend2/node_modules ./apps/agri-frontend2/node_modules
 # 帶入建置所需的原始碼與設定
 COPY . .
+RUN npx prisma generate
 RUN npx nx run agri-frontend2:build
 
 # ---------- runner：最小執行映像 ----------
@@ -37,10 +38,15 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/agri-frontend2/.next/standal
 COPY --from=builder --chown=nextjs:nodejs /app/apps/agri-frontend2/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/agri-frontend2/.next/static ./apps/agri-frontend2/.next/static
 
+# ② 帶入 Prisma CLI 與 schema
+#    - 從 deps 階段把 prisma CLI 帶進來
+#    - 把 prisma/schema.prisma 帶進來
+COPY --from=deps /app/node_modules/prisma ./node_modules/prisma
+COPY --from=deps /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --chown=nextjs:nodejs prisma ./prisma
 
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 EXPOSE 3000
 
-
-CMD ["node", "apps/agri-frontend2/server.js"]
+CMD npx prisma migrate deploy && node apps/agri-frontend2/server.js
