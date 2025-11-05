@@ -43,6 +43,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/agri-frontend2/.next/static 
 #    - 把 prisma/schema.prisma 帶進來
 COPY --from=deps /app/node_modules/prisma ./node_modules/prisma
 COPY --from=deps /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=deps /app/node_modules/@prisma ./node_modules/@prisma
 COPY --chown=nextjs:nodejs prisma ./prisma
 
 ENV PORT=3000
