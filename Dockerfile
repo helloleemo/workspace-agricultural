@@ -1,4 +1,6 @@
+
 # syntax=docker.io/docker/dockerfile:1
+# ---------- base：共用基底映像 ----------
 FROM node:20-alpine AS base
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
