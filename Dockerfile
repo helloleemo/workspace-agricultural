@@ -22,6 +22,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/agri-frontend2/node_modules ./apps/agri-frontend2/node_modules
 # 帶入建置所需的原始碼與設定
 COPY . .
+RUN npx prisma generate
 RUN npx nx run agri-frontend2:build
 
 # ---------- runner：最小執行映像 ----------
@@ -49,4 +50,3 @@ ENV HOSTNAME=0.0.0.0
 EXPOSE 3000
 
 CMD npx prisma migrate deploy && node apps/agri-frontend2/server.js
-# CMD ["node", "apps/agri-frontend2/server.js"]
