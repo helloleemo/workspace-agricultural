@@ -41,8 +41,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/agri-frontend2/.next/static 
 # ② 帶入 Prisma CLI 與 schema
 #    - 從 deps 階段把 prisma CLI 帶進來
 #    - 把 prisma/schema.prisma 帶進來
+COPY --from=deps /app/node_modules/.bin ./node_modules/.bin
 COPY --from=deps /app/node_modules/prisma ./node_modules/prisma
-COPY --from=deps /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 COPY --from=deps /app/node_modules/@prisma ./node_modules/@prisma
 COPY --chown=nextjs:nodejs prisma ./prisma
 
