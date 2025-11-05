@@ -22,20 +22,10 @@ const iconContent: {
   { name: 'Line', icon: LineIcon, webLink: 'https://line.me', mobileLink: '' },
 ];
 
-export const IconList = ({
-  title,
-  theme,
-}: {
-  title: string;
-  theme: 'light' | 'dark';
-}) => {
+export const IconList = ({ title, theme }: { title: string; theme: 'light' | 'dark' }) => {
   return (
     <>
-      <p
-        className={`text-xs font-semibold ${
-          theme === 'light' ? 'text-white' : 'text-black'
-        }`}
-      >
+      <p className={`text-base font-semibold ${theme === 'light' ? 'text-white' : 'text-black'}`}>
         {title}
       </p>
       <ul className="flex justify-center gap-5 pt-5">

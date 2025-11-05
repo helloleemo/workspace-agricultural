@@ -1,5 +1,4 @@
 import { apiClient } from '@/lib/api';
-import { use } from 'react';
 
 export default function ProductPage() {
   const content: { products: string; product: string } = {

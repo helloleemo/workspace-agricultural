@@ -1,120 +1,70 @@
-  generator client {
+generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  // directUrl  = env("DIRECT_URL") // 讓 migrate/生成 client 走直連
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-
-// 執行遷移（會自動執行 generate）
-// npx prisma migrate dev --name init
-
-// 如果只是修改了 schema 但不需要遷移，單獨執行 generate
-// npx prisma generate
-
-/*------------------
-INDEX
-$1. 產品資料表
-$2. 訂單資料表
-$3. 會員資料表
-$4. 酷碰卷資料表
--------------------*/
-
-// ------------------------------------------
-// ---------- $1. 產品資料表 -----------------
-// ------------------------------------------
-
 model Product {
-  id          String   @id @default(uuid()) @db.VarChar(50)
-  name        String   @db.VarChar(100)
-  description String   @db.Text
-  mainImage   String   @db.VarChar(255)
-  detailImages String[] @db.VarChar(255)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String        @id @default(uuid()) @db.VarChar(50)
+  name         String        @db.VarChar(100)
+  description  String
+  mainImage    String        @db.VarChar(255)
+  detailImages String[]      @db.VarChar(255)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   productTypes ProductType[]
 }
 
 model ProductType {
-  id        String   @id @default(uuid())
-  price       Int @db.Integer
-  type      String   @db.VarChar(50)
-  stock     Int @db.Integer
-  reserved  Int      @default(0) @db.Integer
-  remain    Int     @default(0) @db.Integer
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String @db.VarChar(50)
+  id         String      @id @default(uuid())
+  price      Int
+  type       String      @db.VarChar(50)
+  stock      Int
+  reserved   Int         @default(0)
+  remain     Int         @default(0)
+  productId  String      @db.VarChar(50)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
   orderItems OrderItem[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  product    Product     @relation(fields: [productId], references: [id])
 }
 
-// ------------------------------------------
-// ---------- $2. 訂單資料表 -----------------
-// ------------------------------------------
 model Order {
-  id         String       @id @default(uuid())
-  userId     String?      @db.VarChar(50)
-  user       Users?        @relation(fields: [userId], references: [id])
-
-  customerName  String   @db.VarChar(100)
-  customerEmail String   @db.VarChar(100)
-  customerPhone String   @db.VarChar(100)
-  deliverAddress String?  @db.VarChar(255)
-
-  couponId    String?
-  coupon      Coupon?   @relation(fields: [couponId], references: [id])
-
-
-  totalPrice      Int
-  status     OrderStatus   @default(pending)
-  orderItems OrderItem[]
-  deliverType   DeliverType @default(home_delivery)
-  deliverNumber String? @db.VarChar(100)
-  paymentType   PaymentType @default(atm_transfer)
-  atmLastFive   String?  @db.VarChar(5)
-
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id             String      @id @default(uuid())
+  userId         String?     @db.VarChar(50)
+  customerName   String      @db.VarChar(100)
+  customerEmail  String      @db.VarChar(100)
+  customerPhone  String      @db.VarChar(100)
+  deliverAddress String?     @db.VarChar(255)
+  couponId       String?
+  totalPrice     Int
+  status         OrderStatus @default(pending)
+  deliverType    DeliverType @default(home_delivery)
+  deliverNumber  String?     @db.VarChar(100)
+  paymentType    PaymentType @default(atm_transfer)
+  atmLastFive    String?     @db.VarChar(5)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  coupon         Coupon?     @relation(fields: [couponId], references: [id])
+  user           Users?      @relation(fields: [userId], references: [id])
+  orderItems     OrderItem[]
 }
+
 model OrderItem {
-  id            String       @id @default(uuid())
-  order         Order        @relation(fields: [orderId], references: [id])
-  orderId       String       @db.VarChar(50)
-  productType   ProductType  @relation(fields: [productTypeId], references: [id])
-  productTypeId String     @db.VarChar(50)
-  quantity      Int          @db.Integer
-  price         Int          @db.Integer
-
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id            String      @id @default(uuid())
+  orderId       String      @db.VarChar(50)
+  productTypeId String      @db.VarChar(50)
+  quantity      Int
+  price         Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  order         Order       @relation(fields: [orderId], references: [id])
+  productType   ProductType @relation(fields: [productTypeId], references: [id])
 }
-
-enum OrderStatus {
-  pending // 尚未付款
-  paid // 已付款
-  shipped // 運送中
-  refunded // 已退款
-  in_progress // 處理中
-  completed // 運送完成
-  cancelled // 已取消
-}
-
-enum DeliverType {
-  home_delivery // 宅配
-  store_pickup // 門市取貨
-}
-
-enum PaymentType {
-  atm_transfer // atm匯款
-}
-
-// ------------------------------------------
-// ---------- $3. 會員資料表 -----------------
-// ------------------------------------------
 
 model Users {
   id        String   @id @default(uuid())
@@ -123,27 +73,41 @@ model Users {
   phone     String   @unique @db.VarChar(100)
   password  String   @db.VarChar(255)
   orders    Order[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// ------------------------------------------
-// ---------- $4. 酷碰卷資料表 -----------------
-// ------------------------------------------
 model Coupon {
-  id          String   @id @default(uuid())
-  code        String   @unique @db.VarChar(50)
-  description String? @db.Text
-  discount    Float  @db.DoublePrecision
-  isPercent   Boolean  @default(false)
-  usageLimit  Int? @db.Integer
-  usedCount   Int     @default(0)
+  id          String    @id @default(uuid())
+  code        String    @unique @db.VarChar(50)
+  description String?
+  discount    Float
+  isPercent   Boolean   @default(false)
+  usageLimit  Int?
+  usedCount   Int       @default(0)
   validFrom   DateTime?
   validTo     DateTime?
-  isActive    Boolean  @default(true)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   orders      Order[]
+}
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+enum OrderStatus {
+  pending
+  paid
+  shipped
+  refunded
+  in_progress
+  completed
+  cancelled
+}
+
+enum DeliverType {
+  home_delivery
+  store_pickup
+}
+
+enum PaymentType {
+  atm_transfer
 }
