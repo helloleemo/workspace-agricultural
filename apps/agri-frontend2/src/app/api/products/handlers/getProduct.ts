@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../utils/prisma';
+import { prisma } from '../../utils/prisma';
 
 export const getProduct = async (id: string) => {
   const product = await prisma.product.findUnique({

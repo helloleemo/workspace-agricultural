@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../utils/prisma';
+import { prisma } from '../../utils/prisma';
 
 const putProduct = async (req: NextRequest, id: string) => {
   try {
