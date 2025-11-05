@@ -13,11 +13,11 @@ const content = {
 
 export default function Index() {
   return (
-    <>
+    <div>
       {/* 主圖 */}
       <div className="border">
         <FadeCarousel />
       </div>
-    </>
+    </div>
   );
 }

@@ -94,13 +94,13 @@ model Coupon {
 }
 
 enum OrderStatus {
-  pending
-  paid
-  shipped
-  refunded
-  in_progress
-  completed
-  cancelled
+  pending // 處理中(商家)
+  paid // 已付款
+  shipped //　已出貨
+  refunded // 已退款
+  in_progress // 訂單進行中(客戶)
+  completed // 訂單完成
+  cancelled // 訂單取消
 }
 
 enum DeliverType {
