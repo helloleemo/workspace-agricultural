@@ -8,11 +8,13 @@ RUN apk add --no-cache libc6-compat
 # ---------- deps：只安裝依賴，最大化快取 ----------
 FROM base AS deps
 WORKDIR /app
-# 複製會影響相依的檔案：根 package* + app 的 package*
-COPY package.json package-lock.json* ./
-COPY apps/agri-frontend2/package.json ./apps/agri-frontend2/package.json
+
+COPY package.json package-lock.json ./
 COPY nx.json ./
 COPY tsconfig*.json ./
+
+COPY apps/agri-frontend2/package.json ./apps/agri-frontend2/package.json
+
 RUN npm ci
 
 # ---------- builder：建置 Next ----------
