@@ -1,53 +1,57 @@
+// 登入 /api/auth/login
+
 import { NextResponse } from 'next/server';
 import { prisma } from '../../utils/prisma';
-import bcrypt from 'bcryptjs';
-import { z } from 'zod';
-import { setAuthCookie, signToken } from '../../utils/auth';
+import { comparePassword, signToken } from '@/lib/auth';
+import { cookies } from 'next/headers';
 
-const LoginSchema = z.object({
-  account: z.string().min(3), // 可用 email 或 phone
-  password: z.string().min(8),
-});
-
-export async function POST(req: Request) {
+const POST = async (request: Request) => {
   try {
-    const json = await req.json();
-    const { account, password } = LoginSchema.parse(json);
+    const { account, password } = await request.json();
+    if (!account || !password) {
+      return NextResponse.json({ message: '缺少帳號或密碼' }, { status: 400 });
+    }
 
-    const user = await prisma.users.findFirst({
-      where: {
-        OR: [{ email: account }, { phone: account }],
-      },
+    const user = await prisma.users.findUnique({
+      where: { email: account },
+      // include: { orders: true },
     });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 },
-      );
-    }
+    if (!user)
+      return NextResponse.json({ message: '帳號或密碼錯誤' }, { status: 401 });
 
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 },
-      );
-    }
+    const ok = await comparePassword(password, user.password);
+    if (!ok)
+      return NextResponse.json({ message: '帳號或密碼錯誤' }, { status: 401 });
 
-    const token = signToken({ userId: user.id });
-    setAuthCookie(token);
+    const token = signToken({ uid: user.id, role: user.role });
+    const cookieStore = await cookies();
+    cookieStore.set('token', token, {
+      httpOnly: true,
+      path: '/',
+      sameSite: 'lax',
+      // secure: true, // 部署 HTTPS 後打開
+      maxAge: 60 * 60 * 24 * 7,
+    });
 
-    // 不回傳密碼
-    const { password: _pw, ...safe } = user;
-    return NextResponse.json({ user: safe }, { status: 200 });
-  } catch (err: any) {
-    if (err?.issues) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: err.issues },
-        { status: 400 },
-      );
-    }
-    return NextResponse.json({ error: 'Login failed' }, { status: 500 });
+    return NextResponse.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      token,
+      // order: user.orders,
+    });
+  } catch (err) {
+    return NextResponse.json(
+      {
+        message: '登入失敗',
+        error: err instanceof Error ? err.message : String(err),
+      },
+      { status: 500 },
+    );
   }
-}
+};
+
+export { POST };

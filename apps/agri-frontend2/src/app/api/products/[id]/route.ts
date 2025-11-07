@@ -1,25 +1,51 @@
-import { NextRequest } from 'next/server';
-import { getProduct } from '../handlers/getProduct';
-import { putProduct } from '../handlers/putProduct';
-import { deleteProduct } from '../handlers/deleteProduct';
+import { NextResponse } from 'next/server';
+import { prisma } from '../../utils/prisma';
+import { productUpdateSchema } from '../schema';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
-  return getProduct(params.id);
-}
+// 取得單一產品
+// GET /api/products/:id
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
-  return putProduct(req, params.id);
-}
+const GET = async (_request: Request, context: any) => {
+  const params = await context.params;
+  const product = await prisma.product.findUnique({
+    where: { id: params.id },
+    include: { productTypes: true },
+  });
+  return product
+    ? NextResponse.json(product)
+    : NextResponse.json({ message: 'Not Found' }, { status: 404 });
+};
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
-  return deleteProduct(params.id);
-}
+// 修改產品
+// PUT /api/products/:id
+const PUT = async (request: Request, context: any) => {
+  try {
+    const params = await context.params;
+    const json = await request.json();
+    const data = productUpdateSchema.parse(json);
+
+    const prismaData = {
+      ...data,
+      productTypes: data.productTypes
+        ? {
+            deleteMany: {},
+            create: data.productTypes,
+          }
+        : undefined,
+    };
+
+    const updated = await prisma.product.update({
+      where: { id: params.id },
+      data: prismaData,
+      include: { productTypes: true },
+    });
+    return NextResponse.json(updated);
+  } catch (err) {
+    return NextResponse.json(
+      { message: 'Failed to update product', error: (err as Error).message },
+      { status: 400 },
+    );
+  }
+};
+
+export { GET, PUT };
