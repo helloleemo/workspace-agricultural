@@ -1,56 +1,65 @@
-// 登入 /api/auth/login
-
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../utils/prisma';
-import { comparePassword, signToken } from '@/lib/auth';
-import { cookies } from 'next/headers';
+import {
+  comparePassword,
+  signToken,
+  signRefreshToken,
+  TOKEN_NAME,
+  REFRESH_TOKEN_NAME,
+} from '@/lib/auth';
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleApiError,
+} from '@/lib/handler';
+import { loginInput } from '@/lib/zod/login';
 
-const POST = async (request: Request) => {
+// 登入
+const POST = async (req: NextRequest) => {
   try {
-    const { account, password } = await request.json();
-    if (!account || !password) {
-      return NextResponse.json({ message: '缺少帳號或密碼' }, { status: 400 });
-    }
+    const json = await req.json();
+    const data = loginInput.parse(json);
 
     const user = await prisma.users.findUnique({
-      where: { email: account },
-      // include: { orders: true },
+      where: {
+        email: data.account,
+      },
     });
 
-    if (!user)
-      return NextResponse.json({ message: '帳號或密碼錯誤' }, { status: 401 });
+    if (!user) {
+      return createErrorResponse('帳號或密碼錯誤', 401, 'INVALID_CREDENTIALS');
+    }
 
-    const ok = await comparePassword(password, user.password);
-    if (!ok)
-      return NextResponse.json({ message: '帳號或密碼錯誤' }, { status: 401 });
+    const ok = await comparePassword(data.password, user.password);
+    if (!ok) {
+      return createErrorResponse('帳號或密碼錯誤', 401, 'INVALID_CREDENTIALS');
+    }
 
-    const token = signToken({ uid: user.id, role: user.role });
-    const cookieStore = await cookies();
-    cookieStore.set('token', token, {
+    // 產生 Access Token 和 Refresh Token
+    const accessToken = signToken({ uid: user.id, role: user.role });
+    const refreshToken = signRefreshToken({ uid: user.id, role: user.role });
+
+    const response = createSuccessResponse(user, 200, '登入成功');
+
+    // 設定 Access Token Cookie (短時效)
+    response.cookies.set(TOKEN_NAME, accessToken, {
       httpOnly: true,
       path: '/',
       sameSite: 'lax',
-      // secure: true, // 部署 HTTPS 後打開
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 15, // 15 分鐘
     });
 
-    return NextResponse.json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      token,
-      // order: user.orders,
+    // 設定 Refresh Token Cookie (長時效)
+    response.cookies.set(REFRESH_TOKEN_NAME, refreshToken, {
+      httpOnly: true,
+      path: '/',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 天
     });
-  } catch (err) {
-    return NextResponse.json(
-      {
-        message: '登入失敗',
-        error: err instanceof Error ? err.message : String(err),
-      },
-      { status: 500 },
-    );
+
+    return response;
+  } catch (err: unknown) {
+    return handleApiError(err);
   }
 };
 

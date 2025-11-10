@@ -1,48 +1,64 @@
+import { createSuccessResponse, handleApiError } from '@/lib/handler';
 import { prisma } from '../utils/prisma';
-import { productCreateSchema } from './schema';
+import { productCreateSchema } from '@/lib/zod/product';
 import { Prisma } from '@prisma/client';
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { requireAuth, requireRole } from '@/lib/auth';
 
 // 搜尋產品
 // GET /api/products?search=...&page=1&pageSize=20
 
-const GET = async (req: Request) => {
-  const { searchParams } = new URL(req.url);
-  const q = searchParams.get('search') ?? '';
-  const page = Number(searchParams.get('page') ?? '1');
-  const pageSize = Number(searchParams.get('pageSize') ?? '20');
-  // const skip = (Math.max(page, 1) - 1) * Math.max(pageSize, 1);
-  // const take = Math.max(pageSize, 1);
-  const where = q
-    ? {
-        OR: [
-          { name: { contains: q, mode: Prisma.QueryMode.insensitive } },
-          { description: { contains: q, mode: Prisma.QueryMode.insensitive } },
-        ],
-      }
-    : {};
+const GET = async (req: NextRequest) => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const q = searchParams.get('search') ?? '';
+    const page = Number(searchParams.get('page') ?? '1');
+    const pageSize = Number(searchParams.get('pageSize') ?? '100');
+    // const skip = (Math.max(page, 1) - 1) * Math.max(pageSize, 1);
+    // const take = Math.max(pageSize, 1);
+    const where = q
+      ? {
+          OR: [
+            { name: { contains: q, mode: Prisma.QueryMode.insensitive } },
+            {
+              description: {
+                contains: q,
+                mode: Prisma.QueryMode.insensitive,
+              },
+            },
+          ],
+        }
+      : {};
 
-  const [items, total] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      // skip,
-      // take,
-      orderBy: { createdAt: 'desc' },
-      include: { productTypes: true }, // 包含productTypes
-    }),
-    prisma.product.count({ where }),
-  ]);
-
-  return NextResponse.json({ items, total, page, pageSize });
+    const [items, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        // skip,
+        // take,
+        orderBy: { createdAt: 'desc' },
+        include: { productTypes: true },
+      }),
+      prisma.product.count({ where }),
+    ]);
+    return createSuccessResponse({ items, total, page, pageSize });
+  } catch (error) {
+    return handleApiError(error);
+  }
 };
 
 // 新增產品 POST
 
-const POST = async (req: Request) => {
+const POST = async (req: NextRequest) => {
   try {
+    // 驗證身分
+    const auth = requireAuth(req);
+    requireRole(auth, ['SUPERUSER']);
+
+    // 驗證內容
     const json = await req.json();
     const data = productCreateSchema.parse(json);
 
+    // 建立產品
     const created = await prisma.product.create({
       data: {
         name: data.name,
@@ -60,19 +76,9 @@ const POST = async (req: Request) => {
       include: { productTypes: true },
     });
 
-    return NextResponse.json(created, { status: 201 });
-  } catch (err: any) {
-    if (err.name === 'ZodError') {
-      return NextResponse.json(
-        { message: 'Invalid payload', issues: err.issues },
-        { status: 400 },
-      );
-    }
-    console.error(err);
-    return NextResponse.json(
-      { message: 'Internal Server Error' },
-      { status: 500 },
-    );
+    return createSuccessResponse(created, 201, '產品建立成功');
+  } catch (err: unknown) {
+    return handleApiError(err);
   }
 };
 

@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
 const productTypeSchema = z.object({
-  type: z.string().min(1, '類型必填'), // 必填
-  price: z.number().int().positive('價格必須大於0'), // 必填
-  stock: z.number().int().nonnegative(), // 必填
+  id: z.string().min(1).optional(),
+  type: z.string().min(1, '類型必填'),
+  price: z.number().int().positive('價格必須大於0'),
+  stock: z.number().int().nonnegative(),
 });
 
 const productCreateSchema = z.object({
@@ -11,7 +12,7 @@ const productCreateSchema = z.object({
   description: z.string().optional().default(''),
   mainImage: z.string(),
   detailImages: z.array(z.string()).optional().default([]),
-  productTypes: z.array(productTypeSchema).min(1, '至少要有一個類型'), // 必填且至少一個
+  productTypes: z.array(productTypeSchema).min(1, '至少要有一個類型'),
 });
 
 const productUpdateSchema = productCreateSchema.partial();

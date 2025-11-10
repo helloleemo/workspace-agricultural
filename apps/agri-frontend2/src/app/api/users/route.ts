@@ -1,51 +1,56 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/api/utils/prisma';
-import { getAuth, requireRole, hashPassword } from '@/lib/auth';
+import { requireAuth, requireRole } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { createErrorResponse, createSuccessResponse } from '@/lib/handler';
 
-export async function GET(req: Request) {
-  const auth = await getAuth();
+const GET = async (req: NextRequest) => {
   try {
+    // 驗證身分
+    const auth = requireAuth(req);
     requireRole(auth, ['SUPERUSER']);
-  } catch (e: any) {
-    return NextResponse.json(
-      { message: e.message },
-      { status: e.status ?? 403 },
-    );
+
+    const { searchParams } = new URL(req.url);
+    const q = searchParams.get('search') ?? '';
+    // const page = Number(searchParams.get('page') ?? '1');
+    // const pageSize = Number(searchParams.get('pageSize') ?? '100');
+    // const skip = (Math.max(page, 1) - 1) * Math.max(pageSize, 1);
+    // const take = Math.max(pageSize, 1);
+
+    const where = q
+      ? {
+          OR: [
+            { name: { contains: q, mode: Prisma.QueryMode.insensitive } },
+            { email: { contains: q, mode: Prisma.QueryMode.insensitive } },
+            { phone: { contains: q, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [users, total] = await Promise.all([
+      prisma.users.findMany({
+        where,
+        // skip: (page - 1) * pageSize,
+        // take: pageSize,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          role: true,
+          orders: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      prisma.users.count({ where }),
+    ]);
+
+    return createSuccessResponse({ users, total }, 200, '取得使用者列表成功');
+  } catch (err: unknown) {
+    return createErrorResponse((err as Error).message, 500);
   }
+};
 
-  const { searchParams } = new URL(req.url);
-  const q = searchParams.get('q') ?? '';
-  // const page = Number(searchParams.get('page') ?? '1');
-  const where = q
-    ? {
-        OR: [
-          { name: { contains: q, mode: Prisma.QueryMode.insensitive } },
-          { email: { contains: q, mode: Prisma.QueryMode.insensitive } },
-          { phone: { contains: q, mode: Prisma.QueryMode.insensitive } },
-        ],
-      }
-    : {};
-
-  const [items, total] = await Promise.all([
-    prisma.users.findMany({
-      where,
-      // skip: (page - 1) * pageSize,
-      // take: pageSize,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        role: true,
-        orders: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    }),
-    prisma.users.count({ where }),
-  ]);
-
-  return NextResponse.json({ items, total });
-}
+export { GET };
