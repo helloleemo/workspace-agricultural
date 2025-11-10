@@ -1,32 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/api/utils/prisma';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, requireRole } from '@/lib/auth';
+import { createErrorResponse } from '@/lib/handler';
 
-type Params = { params: { id: string } };
-
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } },
+) {
   try {
-    const user = requireAuth(req);
+    const auth = requireAuth(req);
     const order = await prisma.order.findUnique({
-      where: { id: params.id },
+      where: { id: auth.uid },
       include: {
         orderItems: true,
         coupon: true,
         user: { select: { id: true, email: true } },
       },
     });
-    if (!order)
-      return NextResponse.json(
-        { ok: false, message: 'Not found' },
-        { status: 404 },
-      );
-
-    if (user.role !== 'SUPERUSER' && order.userId !== user.id) {
-      return NextResponse.json(
-        { ok: false, message: 'Forbidden' },
-        { status: 403 },
-      );
-    }
+    if (!order) return createErrorResponse('Not found', 404);
 
     return NextResponse.json({ ok: true, order });
   } catch (err: any) {

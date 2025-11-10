@@ -9,13 +9,22 @@ import {
 
 const GET = async (req: NextRequest) => {
   try {
-    const auth = readTokenFromRequest(req);
+    const auth = requireAuth(req);
     if (!auth) {
       return createErrorResponse('未授權或 Token 無效', 401);
     }
     const user = await prisma.users.findUnique({
-      where: { id: auth },
+      where: { id: auth.uid },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
+
     if (!user) {
       return createErrorResponse('使用者不存在', 404);
     }
